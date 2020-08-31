@@ -1,0 +1,9 @@
+<launch>
+  <arg name="robotname" default="porter" />
+  <arg name="use_gui" default="false" />
+
+  <node pkg="lasr_pcl" type="transform_cloud_server" name="transform_cloud_server" respawn="true" output="screen"/>
+  <node pkg="lasr_object_detection_yolo" type="object_detection_server.py" name="yolo_object_detection_server" respawn="true" output="screen"/>
+  <node pkg="butler_erl" type="pick_n_place_server.py" name="pick_n_place_server" respawn="true" output="screen"/>
+  <node pkg="jeff_segment_objects" type="jeff_segment_objects_node" name="segment_objects_server" respawn="true" output="screen"/>
+</launch>

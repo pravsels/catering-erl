@@ -1,0 +1,4 @@
+
+links_to_allow_contact: ['gripper_left_finger_link', 'gripper_right_finger_link', 'gripper_link']
+
+dialogflow_project_id: 'butler-erl-vtjkxx'

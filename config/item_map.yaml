@@ -1,0 +1,11 @@
+furniture:
+  - name: 'tv room table'
+    bottom_left: { x: -6.54, y: -4.63, z: 0.0 }
+    top_right: { x: -7.51, y: -5.39, z: 0.0 }
+
+  - name: 'dining room table'
+    bottom_left: { x: -6.12, y: 1.87, z: 0.0 }
+    top_right: { x: -4.76, y: 2.57, z: 0.0 }
+
+
+user_position: { x: -0.0068, y: 1.99, z: 0.0 }

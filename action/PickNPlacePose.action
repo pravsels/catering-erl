@@ -1,0 +1,10 @@
+# Object center pose and dimensions 
+geometry_msgs/PoseStamped object_pose
+float32 object_width
+float32 object_height
+float32 object_depth
+---
+# result
+# comes from moveit_msgs/MoveItErrorCodes
+int32 error_code
+---

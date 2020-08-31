@@ -1,0 +1,26 @@
+<launch>
+    <arg name="robotname"         default="butler" />
+    <arg name="use_gui"           default="false" />
+    <arg name="public_sim"        default="true" />
+    <arg name="world"             default="home" />
+    <arg name="use_moveit_camera" default="true" />
+    <arg name="robot"             default="steel" />
+
+    <env name="GAZEBO_MODEL_PATH" value="$(find custom_worlds)/models" />
+    <env name="GAZEBO_RESOURCE_PATH" value="$(find custom_worlds)/worlds" />
+    <arg name="map" default="$(env HOME)/tiago_ws/src/butler_erl/maps/$(arg world)" />
+
+    <include file="$(find butler_erl)/launch/fetch.launch">
+      <arg name="public_sim"        value="$(arg public_sim)"/>
+      <arg name="robot"             value="$(arg robot)"/>
+      <arg name="world"             value="$(arg world)"/>
+      <arg name="map"               value="$(arg map)" />
+      <arg name="use_moveit_camera" value="$(arg use_moveit_camera)" />
+    </include>
+
+    <!-- Load the custom motions and map of furniture locations into the parameter server -->
+    <rosparam command="load" file="$(find butler_erl)/config/motions.yaml" />
+    <rosparam command="load" file="$(find butler_erl)/config/item_map.yaml" />
+    <rosparam command="load" file="$(find butler_erl)/config/pick_n_place_params.yaml" />
+
+</launch>
