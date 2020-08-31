@@ -135,72 +135,80 @@ class OccupancyGridMap:
 		return center
 
 
-	def approach_object(self, furniture, object, step_size=0.2, offset=2):
+	def approach_object(self, furniture, object, step_size=0.1, offset=2):
 		# find point to approach object on furniture
-		bottom_left = furniture['bottom_left']
-		top_right = furniture['top_right']
-
-		approach_point = Point(object.centroid.x, bottom_left.y, 0.0)
-
-		occupancy_value = self.get_occupancy_value_by_location(approach_point.x, approach_point.y)
-
-		if top_right.y > bottom_left.y:
-			step_size *= -1
-
-		# TODO: fill up table as occupied
-		while occupancy_value > self.free_thresh:
-			approach_point.y += step_size
-			occupancy_value = self.get_occupancy_value_by_location(approach_point.x, approach_point.y)
-
-		approach_point.y += step_size*offset
-		print('object approach point : ')
-		print(approach_point)
-		marker = Util.visualize_marker(approach_point, frame='map', scale=0.2)
-		self.marker_pub.publish(marker)
-
-		return approach_point
-
-		# bottom_left = { 'name': 'bottom_left', 'point': furniture['bottom_left'] }
-		# bottom_right = { 'name': 'bottom_right', 'point': furniture['bottom_right'] }
-		# top_right = { 'name': 'top_right', 'point': furniture['top_right'] }
-		# top_left = { 'name': 'top_left', 'point': furniture['top_left'] }
-
-		# corners = [bottom_left, bottom_right, top_right, top_left]
+		# bottom_left = furniture['bottom_left']
+		# top_right = furniture['top_right']
 		#
-		# # store distance from object center
-		# for corner in corners:
-		# 	corner['distance'] = Util.point_distance(corner['point'], object.centroid)
-		# # sort corners by distance from object
-		# corners = sorted(corners, key=lambda x: x['distance'])
-		# approach_corner = corners[0] # choose closest corner
-		# print('corner closest to : ')
-		# print(approach_corner)
+		# approach_point = Point(object.centroid.x, bottom_left.y, 0.0)
+		#
+		# occupancy_value = self.get_occupancy_value_by_location(approach_point.x, approach_point.y)
+		#
+		# if top_right.y > bottom_left.y:
+		# 	step_size *= -1
+		#
+		# # TODO: fill up table as occupied
+		# while occupancy_value > self.free_thresh:
+		# 	approach_point.y += step_size
+		# 	occupancy_value = self.get_occupancy_value_by_location(approach_point.x, approach_point.y)
+		#
+		# approach_point.y += step_size*offset
+		# print('object approach point : ')
+		# print(approach_point)
+		# marker = Util.visualize_marker(approach_point, frame='map', scale=0.2)
+		# self.marker_pub.publish(marker)
+		#
+		# return approach_point
+
+		bottom_left = { 'name': 'bottom_left', 'point': furniture['bottom_left'] }
+		bottom_right = { 'name': 'bottom_right', 'point': furniture['bottom_right'] }
+		top_right = { 'name': 'top_right', 'point': furniture['top_right'] }
+		top_left = { 'name': 'top_left', 'point': furniture['top_left'] }
+
+		corners = [bottom_left, bottom_right, top_right, top_left]
+
+		# store distance from object center
+		for corner in corners:
+			corner['distance'] = Util.point_distance(corner['point'], object.centroid)
+		# sort corners by distance from object
+		corners = sorted(corners, key=lambda x: x['distance'])
+		approach_corner = corners[0] # choose closest corner
+		print('corner closest to : ')
+		print(approach_corner)
 
 		# project centroid onto adjacent table sides of nearest corner
-		# approach_point1 = {'point': Point(approach_corner['point'].x, object.centroid.y, 0.0) }
-		# approach_point2 = { 'point': Point(object.centroid.x, approach_corner['point'].y, 0.0) }
-		# approach_points = [approach_point1, approach_point2]
-		# for ap in approach_points:
-		# 	ap['distance'] = Util.point_distance(ap['point'], object.centroid)
-		# # sort approach points by distance to object
-		# approach_points = sorted(approach_points, key=lambda x: x['distance'])
-		# approach_point = approach_points[0] # choose closest point
-		#
-		# # the 4 directions N, S, E, W
-		# directions = []
-		# directions.extend(list(permutations([0, step_size], 2)))
-		# directions.extend(list(permutations([-1*step_size, 0], 2)))
-		#
-		# for direction in directions:
-		# 	# unit distance in all 4 directions
-		# 	x_loc =  approach_point['point'].x + offset*direction[0]
-		# 	y_loc =  approach_point['point'].y + offset*direction[1]
-		# 	occupancy_value = self.get_occupancy_value_by_location(x_loc, y_loc)
-		#
-		# 	if occupancy_value >= 0 and occupancy_value <= self.free_thresh:
-		# 		# choose point if not occupied
-		# 		point = Point(x_loc, y_loc, 0.0)
-		# 		marker = Util.visualize_marker(point, frame='map', scale=0.2)
-		# 		self.marker_pub.publish(marker)
-		#
-		# 		return point
+		approach_point1 = {'point': Point(approach_corner['point'].x, object.centroid.y, 0.0) }
+		approach_point2 = { 'point': Point(object.centroid.x, approach_corner['point'].y, 0.0) }
+		approach_points = [approach_point1, approach_point2]
+		for ap in approach_points:
+			ap['distance'] = Util.point_distance(ap['point'], object.centroid)
+		# sort approach points by distance to object
+		approach_points = sorted(approach_points, key=lambda x: x['distance'])
+		approach_point = approach_points[0] # choose closest point
+		marker = Util.visualize_marker(approach_point['point'], frame='map', scale=0.2)
+		self.marker_pub.publish(marker)
+
+		# the 4 directions N, S, E, W
+		directions = list(permutations([-1, 0, 1], 2))
+		directions.append((1, 1))
+		directions.append((-1,-1))
+		sampled_points = []
+
+		for direction in directions:
+			# unit distance in all 4 directions
+			x_loc =  approach_point['point'].x + offset*direction[0]*step_size
+			y_loc =  approach_point['point'].y + offset*direction[1]*step_size
+			occupancy_value = self.get_occupancy_value_by_location(x_loc, y_loc)
+
+			if occupancy_value >= 0 and occupancy_value <= self.free_thresh:
+				# choose point if not occupied
+				point = { 'point': Point(x_loc, y_loc, 0.0) }
+				point['distance'] = Util.point_distance(approach_point['point'], point['point'])
+				sampled_points.append(point)
+
+				marker = Util.visualize_marker(point['point'], frame='map', scale=0.2)
+				self.marker_pub.publish(marker)
+
+		sampled_points = sorted(sampled_points, key=lambda x: x['distance'])
+
+		return sampled_points[0]['point']

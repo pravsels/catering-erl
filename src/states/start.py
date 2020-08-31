@@ -13,7 +13,7 @@ class Start(State):
         self.ogm = ogm
         self.dialogflow_project_id = rospy.get_param('/dialogflow_project_id')
         self.session_id = str(uuid.uuid4())
-        self.speech_mode = 'audio'
+        self.speech_mode = 'text'
 
 
     def get_intent_from_text(self, project_id, session_id, text, language_code='en-US'):
