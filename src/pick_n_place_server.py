@@ -237,7 +237,7 @@ class PickNPlaceServer(object):
             grasp_pose.orientation = Quaternion(*quaternion_from_euler(PI/2, 0.0, 0.0))       # horizontal gripper
             grasp_pose.position.x = grasp_pose.position.x - (distance_between_end_effector_and_gripper + (pnp_goal.object_depth/2))
             approach = Vector3(1.0, 0.0, 0.0)   # appraoch 'in' for front-grasp
-            retreat = Vector3(-1.0, 0.0, 0.0)    # retreat 'out' post-grasp
+            retreat = Vector3(0.0, 0.0, 1.0)    # retreat 'upwards' post-grasp
             grasp_width = pnp_goal.object_width/2
             grasp_width = floor(grasp_width*100)/100
             front_grasp = self.create_grasp(grasp_pose, approach, retreat, grasp_width, grasp_id='front_grasp')
@@ -250,7 +250,7 @@ class PickNPlaceServer(object):
             grasp_pose.position.z = grasp_pose.position.z + (distance_between_end_effector_and_gripper + (pnp_goal.object_height/2))
 
             approach = Vector3(0.0, 0.0, -1.0)   # appraoch 'down' for top-grasp
-            retreat = Vector3(0.0, 0.0, 1.0)    # retreat upwards post-grasp
+            retreat = Vector3(0.0, 0.0, 1.0)    # retreat 'upwards' post-grasp
 
             grasp_width = pnp_goal.object_depth/2
             grasp_width = floor(grasp_width*100)/100
@@ -276,8 +276,12 @@ class PickNPlaceServer(object):
 
         for grasp in grasps:
             # publish grasp marker
-            print('publishing grasp marker!')
-            grasp_marker = Util.visualize_marker(grasp.grasp_pose.pose, scale=0.02, type='pose')
+            print('publishing grasp marker! ' + grasp.id)
+            if grasp.id == 'top_grasp':
+                grasp_marker = Util.visualize_marker(grasp.grasp_pose.pose, scale=0.02, type='pose', color='green')
+            else:
+                grasp_marker = Util.visualize_marker(grasp.grasp_pose.pose, scale=0.02, type='pose')
+
             self.grasp_marker_pub.publish(grasp_marker)
 
         goal = create_pickup_goal('arm_torso', 'part', pnp_goal.object_pose, grasps, self.links_to_allow_contact)

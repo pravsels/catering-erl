@@ -29,7 +29,7 @@ class Explore(State):
     def centroid_within_bounds(self, centroid, objects, thresh=0.2):
         # check if new centroid is within bounds of previously noted ones
         for object in objects:
-            if  abs(centroid.x - object.centroid.x) <= thresh and abs(centroid.y - object.centroid.y) <= thresh:
+            if  Util.within_threshold(centroid.x, object.centroid.x) and Util.within_threshold(centroid.y, object.centroid.y):
                     return True
 
         return False

@@ -180,3 +180,11 @@ class Util:
                     queries.remove(query)
 
         return queries, requests
+
+    @staticmethod
+    def within_threshold(value_a, value_b, threshold=0.3):
+        diff = abs(value_a - value_b)
+        percent_diff = diff / value_a
+        print('percent diff : ', percent_diff)
+
+        return True if percent_diff <= threshold else False

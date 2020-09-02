@@ -116,7 +116,7 @@ class Manipulate(State):
 	def dimensions_within_bounds(self, object, filtered_object, thresh=0.02):
         # check if new centroid is within bounds of previously noted ones
 		print('checking for dimensions : ')
-		if abs(filtered_object.width - object.width) <= thresh and abs(filtered_object.height - object.height) <= thresh and abs(filtered_object.depth - object.depth) <= thresh:
+		if Util.within_threshold(object.width, filtered_object.width) and Util.within_threshold(object.height, filtered_object.height) and Util.within_threshold(object.depth, filtered_object.depth):
 			print(object)
 			print(filtered_object)
 			return True

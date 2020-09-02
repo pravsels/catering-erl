@@ -108,7 +108,7 @@ class OccupancyGridMap:
 		return Point(nearest_point[0], nearest_point[1], 0.0)
 
 
-	def approach_furniture(self, furniture, step_size=0.2, offset=2):
+	def approach_furniture(self, furniture, step_size=0.2, offset=4):
 		# find point to approach furniture
 		bottom_left = furniture['bottom_left']
 		bottom_right = furniture['bottom_right']
@@ -135,7 +135,7 @@ class OccupancyGridMap:
 		return center
 
 
-	def approach_object(self, furniture, object, step_size=0.1, offset=2):
+	def approach_object(self, furniture, object, step_size=0.2, offset=2):
 		# find point to approach object on furniture
 		# bottom_left = furniture['bottom_left']
 		# top_right = furniture['top_right']
