@@ -188,14 +188,14 @@ class OccupancyGridMap:
 		marker = Util.visualize_marker(approach_point['point'], frame='map', scale=0.2)
 		self.marker_pub.publish(marker)
 
-		# the 4 directions N, S, E, W
+		# the 4 directions N, S, E, W, NE, NW, SE, SW
 		directions = list(permutations([-1, 0, 1], 2))
 		directions.append((1, 1))
 		directions.append((-1,-1))
 		sampled_points = []
 
 		for direction in directions:
-			# unit distance in all 4 directions
+			# unit distance in all 8 directions
 			x_loc =  approach_point['point'].x + offset*direction[0]*step_size
 			y_loc =  approach_point['point'].y + offset*direction[1]*step_size
 			occupancy_value = self.get_occupancy_value_by_location(x_loc, y_loc)
