@@ -108,7 +108,6 @@ class Util:
         else:
             rospy.logfatal("base_to_map expected 'Point' but got " + str(type(point)))
 
-
     @staticmethod
     def bb_iou(bounding_box, yolo_detected_objects, match_threshold=0.6):
         # find IOU between pcl segmented bounding box and yolo detected objects

@@ -28,11 +28,12 @@ for name in MoveItErrorCodes.__dict__.keys():
 
 
 class Manipulate(State):
-	def __init__(self, tiago, ogm, search):
+	def __init__(self, tiago, ogm, search, pick_attempts=50):
 		State.__init__(self, outcomes=['manipulate_done'])
 		self.tiago = tiago
 		self.ogm = ogm
 		self.search = search
+		self.pick_attempts = 20
 
 		self.manipulation_srv = rospy.ServiceProxy('manipulation', Manipulation)
 
@@ -114,7 +115,7 @@ class Manipulate(State):
 
 
 	def dimensions_within_bounds(self, object, filtered_object, thresh=0.02):
-        # check if new centroid is within bounds of previously noted ones
+        # check if object dimensions in new frame is within bounds of previously recorded dimensions in a diff frame
 		print('checking for dimensions : ')
 		if Util.within_threshold(object.width, filtered_object.width) and Util.within_threshold(object.height, filtered_object.height) and Util.within_threshold(object.depth, filtered_object.depth):
 			print(object)
@@ -176,11 +177,14 @@ class Manipulate(State):
 
 			self.tiago.talk('I will now attempt to pick this object')
 			# continue with other objects if current pick fails, else deposit
-			if not self.pick_n_place(self.tiago.pick_object):
-				current_fetch_req['status'] = 'pick_failed'
-			else:
-				current_fetch_req['status'] = 'pick_success'
-				break
+			i = 0
+			while (i < self.pick_attempts):
+				if not self.pick_n_place(self.tiago.pick_object):
+					current_fetch_req['status'] = 'pick_failed'
+				else:
+					current_fetch_req['status'] = 'pick_success'
+					break
+				i += 1
 
 		self.tiago.search_n_fetch_requests = fetch_reqs
 
