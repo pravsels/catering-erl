@@ -29,7 +29,7 @@ for name in MoveItErrorCodes.__dict__.keys():
 
 
 def create_pickup_goal(group='arm_torso', target='part',
-    grasp_pose=PoseStamped(), possible_grasps=[], links_to_allow_contact=None):
+    grasp_pose=PoseStamped(), possible_grasps=[], links_to_allow_contact=None, links_to_ignore=None):
     # create MoveIt pickup goal with the provided data
     pickup_goal = PickupGoal()
     pickup_goal.target_name = target
@@ -42,6 +42,8 @@ def create_pickup_goal(group='arm_torso', target='part',
     pickup_goal.planning_options.replan = True
     pickup_goal.planning_options.replan_attempts = 100
     pickup_goal.allowed_touch_objects = [target]
+    pickup_goal.allowed_touch_objects.extend(links_to_ignore)  # arm links to ignore, else arm becomes part of octomap
+    pickup_goal.allowed_touch_objects.extend(links_to_allow_contact)   # include gripper links, to remove from octomap
     pickup_goal.attached_object_touch_links = []
     pickup_goal.attached_object_touch_links.extend(links_to_allow_contact)
 
@@ -99,6 +101,7 @@ class PickNPlaceServer(object):
         rospy.loginfo('successfully connected to clear octomap service!')
 
         self.links_to_allow_contact = rospy.get_param('/links_to_allow_contact')
+        self.links_to_ignore = rospy.get_param('/links_to_ignore')
         if not self.links_to_allow_contact:
             rospy.logwarn("Didn't find any links to allow contacts.. at param ~links_to_allow_contact")
         else:
@@ -231,6 +234,7 @@ class PickNPlaceServer(object):
         eef_gripper_dist = 0.11
         gripper_height = 0.13   # objects must be equal or above this for front-grasp
         max_graspable = 0.1     # max obj dimension that can fit between the grippers
+        grasp_depth = 0.06       # max depth between gripper tip to gripper palm
         grasps = []
 
         if (pnp_goal.object_width < max_graspable and pnp_goal.object_height >= gripper_height):
@@ -251,7 +255,7 @@ class PickNPlaceServer(object):
             top_grasp_width_pose = Pose()
             top_grasp_width_pose.position = pnp_goal.object_pose.pose.position
             top_grasp_width_pose.orientation = Quaternion(*quaternion_from_euler(PI/2, PI/2, 0.0))
-            top_grasp_width_pose.position.z = top_grasp_width_pose.position.z + (eef_gripper_dist + (pnp_goal.object_height/2))
+            top_grasp_width_pose.position.z = top_grasp_width_pose.position.z + (grasp_depth + eef_gripper_dist + (pnp_goal.object_height/2))
 
             top_grasp_width_approach = Vector3(0.0, 0.0, -1.0)   # approach 'down' for top-grasp
             top_grasp_width_retreat = Vector3(0.0, 0.0, 1.0)    # retreat 'upwards' post-grasp
@@ -265,7 +269,7 @@ class PickNPlaceServer(object):
             top_grasp_depth_pose = Pose()
             top_grasp_depth_pose.position = pnp_goal.object_pose.pose.position
             top_grasp_depth_pose.orientation = Quaternion(*quaternion_from_euler(0.0, PI/2, 0.0))
-            top_grasp_depth_pose.position.z = top_grasp_depth_pose.position.z + (eef_gripper_dist + (pnp_goal.object_height/2))
+            top_grasp_depth_pose.position.z = top_grasp_depth_pose.position.z + (grasp_depth + eef_gripper_dist + (pnp_goal.object_height/2))
 
             top_grasp_depth_approach = Vector3(0.0, 0.0, -1.0)   # approach 'down' for top-grasp
             top_grasp_depth_retreat = Vector3(0.0, 0.0, 1.0)    # retreat 'upwards' post-grasp
@@ -307,7 +311,7 @@ class PickNPlaceServer(object):
 
             self.grasp_marker_pub.publish(grasp_marker)
 
-        goal = create_pickup_goal('arm_torso', 'part', pnp_goal.object_pose, grasps, self.links_to_allow_contact)
+        goal = create_pickup_goal('arm_torso', 'part', pnp_goal.object_pose, grasps, self.links_to_allow_contact, self.links_to_ignore)
         rospy.loginfo('sending pick goal')
         self.pickup_ac.send_goal(goal)
         rospy.loginfo('waiting for result')

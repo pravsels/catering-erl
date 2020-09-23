@@ -1,4 +1,4 @@
 
-links_to_allow_contact: ['gripper_left_finger_link', 'gripper_right_finger_link', 'arm_1_link', 'arm_2_link', 'arm_3_link', 'arm_4_link', 'arm_5_link', 'arm_6_link', 'arm_7_link']
-
+links_to_allow_contact: ['gripper_left_finger_link', 'gripper_right_finger_link']
+links_to_ignore: ['arm_1_link', 'arm_2_link', 'arm_3_link', 'arm_4_link', 'arm_5_link', 'arm_6_link', 'arm_7_link']
 dialogflow_project_id: 'butler-erl-vtjkxx'

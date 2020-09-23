@@ -9,7 +9,7 @@ if __name__ == '__main__':
     rospy.init_node('butler')
     tiago = Tiago()
     ogm = OccupancyGridMap()
-    search = Search(dataset='costa')
+    search = Search(dataset='coco')
 
     tiago.play('home')
 
