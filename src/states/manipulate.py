@@ -28,12 +28,11 @@ for name in MoveItErrorCodes.__dict__.keys():
 
 
 class Manipulate(State):
-	def __init__(self, tiago, ogm, search, pick_attempts=50):
+	def __init__(self, tiago, ogm, search):
 		State.__init__(self, outcomes=['manipulate_done'])
 		self.tiago = tiago
 		self.ogm = ogm
 		self.search = search
-		self.pick_attempts = 20
 
 		self.manipulation_srv = rospy.ServiceProxy('manipulation', Manipulation)
 
@@ -177,14 +176,12 @@ class Manipulate(State):
 
 			self.tiago.talk('I will now attempt to pick this object')
 			# continue with other objects if current pick fails, else deposit
-			i = 0
-			while (i < self.pick_attempts):
-				if not self.pick_n_place(self.tiago.pick_object):
-					current_fetch_req['status'] = 'pick_failed'
-				else:
-					current_fetch_req['status'] = 'pick_success'
-					break
-				i += 1
+			if not self.pick_n_place(self.tiago.pick_object):
+				current_fetch_req['status'] = 'pick_failed'
+				self.tiago.play('home')
+			else:
+				current_fetch_req['status'] = 'pick_success'
+				self.tiago.play('pick_final_pose')
 
 		self.tiago.search_n_fetch_requests = fetch_reqs
 
