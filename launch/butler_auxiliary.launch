@@ -6,4 +6,9 @@
   <node pkg="lasr_object_detection_yolo" type="object_detection_server.py" name="yolo_object_detection_server" respawn="true" output="screen"/>
   <node pkg="butler_erl" type="pick_n_place_server.py" name="pick_n_place_server" respawn="true" output="screen"/>
   <node pkg="jeff_segment_objects" type="jeff_segment_objects_node" name="segment_objects_server" respawn="true" output="screen"/>
+
+  <!-- MoveIt Grasps Section -->
+  
+  <!-- MoveIt Grasps Section End -->
+
 </launch>

@@ -8,7 +8,7 @@
 
     <env name="GAZEBO_MODEL_PATH" value="$(find custom_worlds)/models" />
     <env name="GAZEBO_RESOURCE_PATH" value="$(find custom_worlds)/worlds" />
-    <arg name="map" default="$(env HOME)/tiago_ws/src/butler_erl/maps/$(arg world)" />
+    <arg name="map" default="$(find butler_erl)/maps/$(arg world)" />
 
     <include file="$(find butler_erl)/launch/fetch.launch">
       <arg name="public_sim"        value="$(arg public_sim)"/>
@@ -23,4 +23,6 @@
     <rosparam command="load" file="$(find butler_erl)/config/item_map.yaml" />
     <rosparam command="load" file="$(find butler_erl)/config/pick_n_place_params.yaml" />
 
+    <!-- Load srdf that links robot's base frame to map frame, creates groups and declares pairs to avoid collision checking -->
+    <param name="robot_description_semantic" textfile="$(find butler_erl)/config/tiago_gripper_map.srdf" />
 </launch>
