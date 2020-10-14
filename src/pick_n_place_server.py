@@ -13,6 +13,7 @@ from std_srvs.srv import Empty, EmptyRequest
 from copy import deepcopy
 from math import pi as PI
 from math import floor
+import copy
 
 from dynamic_reconfigure.server import Server
 from butler_erl.cfg import GraspConfig
@@ -236,7 +237,7 @@ class PickNPlaceServer(object):
 
         if (pnp_goal.object_width < max_graspable and pnp_goal.object_height >= gripper_height):
             front_grasp_pose = Pose()
-            front_grasp_pose.position = pnp_goal.object_pose.pose.position
+            front_grasp_pose.position = copy.deepcopy(pnp_goal.object_pose.pose.position)
             front_grasp_pose.orientation = Quaternion(*quaternion_from_euler(PI/2, 0.0, 0.0))       # horizontal gripper
             front_grasp_pose.position.x = front_grasp_pose.position.x - (eef_gripper_dist + (pnp_goal.object_depth/2))
 
@@ -250,7 +251,7 @@ class PickNPlaceServer(object):
 
         if (pnp_goal.object_width < max_graspable):
             top_grasp_width_pose = Pose()
-            top_grasp_width_pose.position = pnp_goal.object_pose.pose.position
+            top_grasp_width_pose.position = copy.deepcopy(pnp_goal.object_pose.pose.position)
             top_grasp_width_pose.orientation = Quaternion(*quaternion_from_euler(PI/2, PI/2, 0.0))
             top_grasp_width_pose.position.z = top_grasp_width_pose.position.z + (grasp_depth + eef_gripper_dist + (pnp_goal.object_height/2))
 
@@ -264,7 +265,7 @@ class PickNPlaceServer(object):
 
         if (pnp_goal.object_depth < max_graspable):
             top_grasp_depth_pose = Pose()
-            top_grasp_depth_pose.position = pnp_goal.object_pose.pose.position
+            top_grasp_depth_pose.position = copy.deepcopy(pnp_goal.object_pose.pose.position)
             top_grasp_depth_pose.orientation = Quaternion(*quaternion_from_euler(0.0, PI/2, 0.0))
             top_grasp_depth_pose.position.z = top_grasp_depth_pose.position.z + (grasp_depth + eef_gripper_dist + (pnp_goal.object_height/2))
 
