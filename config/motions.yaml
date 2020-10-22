@@ -31,11 +31,9 @@ play_motion:
         time_from_start: 2.0
 
     pick_final_pose:
-      joints: [arm_1_joint,
-      arm_2_joint, arm_3_joint, arm_4_joint, arm_5_joint,
-      arm_6_joint, arm_7_joint]
+      joints: [arm_1_joint, arm_2_joint, arm_3_joint, arm_4_joint]
       points:
-      - positions: [0.21, -0.2, -2.2, 1.15, -1.57, 0.2, 0.0]
+      - positions: [0.21, -0.2, -2.2, 1.15]
         time_from_start: 10.0
 
     head_look_around:

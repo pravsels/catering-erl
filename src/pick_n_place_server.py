@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 import rospy
 from actionlib import SimpleActionClient, SimpleActionServer
-from moveit_commander import PlanningSceneInterface
+from moveit_commander import PlanningSceneInterface, MoveGroupCommander
 from moveit_msgs.msg import Grasp, PickupAction, PickupGoal, PickupResult, MoveItErrorCodes, GripperTranslation
+from moveit_msgs.msg import Constraints, OrientationConstraint
 from moveit_msgs.msg import PlaceAction, PlaceGoal, PlaceResult, PlaceLocation
 from geometry_msgs.msg import Pose, PoseStamped, PoseArray, Vector3, Quaternion
 from butler_erl.msg import PickNPlacePoseAction, PickNPlacePoseGoal, PickNPlacePoseResult
@@ -114,6 +115,8 @@ class PickNPlaceServer(object):
         self.place_as.start()
 
         self.grasp_marker_pub = rospy.Publisher('/grasp_marker', Marker, queue_size=10)
+
+        self.move_group = MoveGroupCommander('arm_torso')
 
 
     def dynamic_reconfigure_cb(self, config, level):
@@ -286,6 +289,39 @@ class PickNPlaceServer(object):
         self.scene.remove_world_object('part')
 
 
+    # def set_orientation_constraint(self, orientation, frame_id='base_footprint', link_name='arm_tool_link'):
+    #     gripper_constraint = Constraints()
+    #     gripper_constraint.name = 'gripper constraint'
+    #
+    #     gripper_orientation_constraint = OrientationConstraint()
+    #     gripper_orientation_constraint.header.frame_id = frame_id
+    #     gripper_orientation_constraint.link_name = link_name
+    #     gripper_orientation_constraint.orientation = orientation
+    #     gripper_orientation_constraint.absolute_x_axis_tolerance = 0.01  # allow max rotation of 1 degree
+    #     gripper_orientation_constraint.absolute_y_axis_tolerance = 0.01
+    #     gripper_orientation_constraint.absolute_z_axis_tolerance = 0.01
+    #     gripper_orientation_constraint.weight = 1.0
+    #
+    #     gripper_constraint.orientation_constraints = [gripper_orientation_constraint]
+    #
+    #     self.move_group.set_path_constraints(gripper_constraint)
+
+
+    def execute_post_grasp_goal(self, grasp):
+        # create arm goal with same 'arm_tool' orientation as the attempted grasp
+        goal_pose = PoseStamped()
+        goal_pose.header.frame_id = 'base_footprint'
+        goal_pose.pose.position.x = 0.40
+        goal_pose.pose.position.y = 0.00
+        goal_pose.pose.position.z = 0.76
+        goal_pose.pose.orientation = grasp.grasp_pose.pose.orientation
+
+        # set reference frame and send goal
+        self.move_group.set_pose_reference_frame('base_footprint')
+        self.move_group.set_pose_target(goal_pose)
+        self.move_group.go()
+
+
     def grasp_object(self, pnp_goal):
         self.clear_world_objects()
         rospy.loginfo("adding new 'part' object")
@@ -322,6 +358,8 @@ class PickNPlaceServer(object):
             rospy.loginfo('pick result: ' + str(moveit_error_dict[error_code]))
 
             if error_code == 1:
+                # move arm close to body after grasp is successful
+                self.execute_post_grasp_goal(grasp)
                 break
 
         return error_code
