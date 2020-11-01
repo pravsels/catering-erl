@@ -113,10 +113,10 @@ class Manipulate(State):
 		self.tiago.goto_location(Util.turn_towards_point(object.centroid))
 
 
-	def dimensions_within_bounds(self, object, filtered_object, thresh=0.02):
+	def dimensions_within_bounds(self, object, filtered_object, threshold=0.2):
         # check if object dimensions in new frame is within bounds of previously recorded dimensions in a diff frame
 		print('checking for dimensions : ')
-		if Util.within_threshold(object.width, filtered_object.width) and Util.within_threshold(object.height, filtered_object.height) and Util.within_threshold(object.depth, filtered_object.depth):
+		if Util.within_threshold(object.width, filtered_object.width, threshold=threshold) and Util.within_threshold(object.height, filtered_object.height, threshold=threshold) and Util.within_threshold(object.depth, filtered_object.depth, threshold=threshold):
 			print(object)
 			print(filtered_object)
 			return True
@@ -181,7 +181,6 @@ class Manipulate(State):
 				self.tiago.play('home')
 			else:
 				current_fetch_req['status'] = 'pick_success'
-				self.tiago.play('pick_final_pose')
 
 		self.tiago.search_n_fetch_requests = fetch_reqs
 

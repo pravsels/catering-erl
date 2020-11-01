@@ -109,7 +109,7 @@ class Util:
             rospy.logfatal("base_to_map expected 'Point' but got " + str(type(point)))
 
     @staticmethod
-    def bb_iou(bounding_box, yolo_detected_objects, match_threshold=0.6):
+    def bb_iou(bounding_box, yolo_detected_objects, match_threshold=0.5):
         # find IOU between pcl segmented bounding box and yolo detected objects
         for yolo_object in yolo_detected_objects:
             # get the x,y coordinates of the intersection box
@@ -125,12 +125,15 @@ class Util:
             box1_area = (bounding_box.width + 1) * (bounding_box.height + 1)
             box2_area = (yolo_object.xywh[2] + 1) * (yolo_object.xywh[3] + 1)
 
-            iou = area_of_intersection / float(box1_area + box2_area - area_of_intersection)
+            iou_score = area_of_intersection / float(box1_area + box2_area - area_of_intersection)
+            print('yolo object : ', yolo_object.name)
+            print('IOU score : ', iou_score)
+            print('-------------------------------------')
 
-            if iou >= match_threshold:
+            if iou_score >= match_threshold:
                 return True, yolo_object.name
-            else:
-                return False, None
+
+        return False, None
 
     @staticmethod
     def visualize_marker(marker_point, frame='base_footprint', scale=1.0, color='red', type='point'):
@@ -167,7 +170,7 @@ class Util:
         return marker
 
     @staticmethod
-    def create_snf_requests(objects, queries, current_furniture, intent_confidence_thresh=0.55):
+    def create_snf_requests(objects, queries, current_furniture, intent_confidence_thresh=0.50):
         # remove objects that we don't focus on
         requests = []
         for object in objects:
@@ -181,7 +184,7 @@ class Util:
         return queries, requests
 
     @staticmethod
-    def within_threshold(value_a, value_b, threshold=0.3):
+    def within_threshold(value_a, value_b, threshold=0.1):
         diff = abs(value_a - value_b)
         percent_diff = diff / value_a
         print('percent diff : ', percent_diff)

@@ -102,6 +102,8 @@ class Search:
             detection_req = YoloDetectionRequest(image_raw=image, dataset=self.yolo_dataset, confidence=confidence, nms=nms)
             detection_res = self.yolo_detection(detection_req)
 
+            print('YOLO detection results : ', detection_res.detected_objects)
+
             if visualize:
                 try:
                     frame = self.bridge.imgmsg_to_cv2(detection_res.image_bb, 'bgr8')
@@ -212,9 +214,10 @@ class Search:
         # with a bounding box IOU score
         object_tuples = []
         n = len(bounding_boxes)
+        print('No of objects after dimension filter : ', n)
         index = 0
         while (index < n):
-            high_score, matched_object_name = Util.bb_iou(bounding_boxes[index], yolo_detected_objects)
+            high_score, matched_object_name = Util.bb_iou(bounding_boxes[index], yolo_detected_objects, match_threshold=0.7)
             if not high_score:
                 bounding_boxes.pop(index)
                 objects.pop(index)

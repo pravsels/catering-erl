@@ -5,7 +5,7 @@ from moveit_commander import PlanningSceneInterface, MoveGroupCommander
 from moveit_msgs.msg import Grasp, PickupAction, PickupGoal, PickupResult, MoveItErrorCodes, GripperTranslation
 from moveit_msgs.msg import Constraints, OrientationConstraint
 from moveit_msgs.msg import PlaceAction, PlaceGoal, PlaceResult, PlaceLocation
-from geometry_msgs.msg import Pose, PoseStamped, PoseArray, Vector3, Quaternion
+from geometry_msgs.msg import Pose, PoseStamped, PoseArray, Vector3, Quaternion, Twist
 from butler_erl.msg import PickNPlacePoseAction, PickNPlacePoseGoal, PickNPlacePoseResult
 from moveit_msgs.srv import GetPlanningScene, GetPlanningSceneRequest, GetPlanningSceneResponse
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
@@ -117,6 +117,10 @@ class PickNPlaceServer(object):
         self.grasp_marker_pub = rospy.Publisher('/grasp_marker', Marker, queue_size=10)
 
         self.move_group = MoveGroupCommander('arm_torso')
+
+        self.rate = rospy.Rate(10)
+        self.velocity = Twist()
+        self.velocity_publisher = rospy.Publisher('/mobile_base_controller/cmd_vel', Twist, queue_size=10)
 
 
     def dynamic_reconfigure_cb(self, config, level):
@@ -239,18 +243,33 @@ class PickNPlaceServer(object):
         grasps = []
 
         if (pnp_goal.object_width < max_graspable and pnp_goal.object_height >= gripper_height):
-            front_grasp_pose = Pose()
-            front_grasp_pose.position = copy.deepcopy(pnp_goal.object_pose.pose.position)
-            front_grasp_pose.orientation = Quaternion(*quaternion_from_euler(PI/2, 0.0, 0.0))       # horizontal gripper
-            front_grasp_pose.position.x = front_grasp_pose.position.x - (eef_gripper_dist + (pnp_goal.object_depth/2))
+            front_grasp_center_pose = Pose()
+            front_grasp_center_pose.position = copy.deepcopy(pnp_goal.object_pose.pose.position)
+            front_grasp_center_pose.orientation = Quaternion(*quaternion_from_euler(PI/2, 0.0, 0.0))       # horizontal gripper
+            front_grasp_center_pose.position.x = front_grasp_center_pose.position.x - (eef_gripper_dist + (pnp_goal.object_depth/2))
 
-            front_approach = Vector3(1.0, 0.0, 0.0)   # approach 'in' for front-grasp
-            front_retreat = Vector3(0.0, 0.0, 1.0)    # retreat 'upwards' post-grasp
+            front_center_approach = Vector3(1.0, 0.0, 0.0)   # approach 'in' for front-grasp
+            front_center_retreat = Vector3(0.0, 0.0, 1.0)    # retreat 'upwards' post-grasp
 
-            front_grasp_width = pnp_goal.object_width/2
-            front_grasp_width = floor(front_grasp_width*100)/100
-            front_grasp = self.create_grasp(front_grasp_pose, front_approach, front_retreat, front_grasp_width, grasp_id='front_grasp')
-            grasps.append(front_grasp)
+            front_center_grasp_width = pnp_goal.object_width/2.3
+            front_center_grasp_width = floor(front_center_grasp_width*100)/100
+            front_center_grasp = self.create_grasp(front_grasp_center_pose, front_center_approach, front_center_retreat, front_center_grasp_width, grasp_id='front_center_grasp')
+            grasps.append(front_center_grasp)
+
+        if (pnp_goal.object_width < max_graspable and pnp_goal.object_height > (gripper_height/2.0)):
+            front_grasp_top_pose = Pose()
+            front_grasp_top_pose.position = copy.deepcopy(pnp_goal.object_pose.pose.position)
+            front_grasp_top_pose.orientation = Quaternion(*quaternion_from_euler(PI/2, 0.0, 0.0))       # horizontal gripper
+            front_grasp_top_pose.position.x = front_grasp_top_pose.position.x - (eef_gripper_dist + (pnp_goal.object_depth/2))
+            front_grasp_top_pose.position.z = front_grasp_top_pose.position.z + (pnp_goal.object_height/2) - 0.05
+
+            front_top_approach = Vector3(1.0, 0.0, 0.0)   # approach 'in' for front-grasp
+            front_top_retreat = Vector3(0.0, 0.0, 1.0)    # retreat 'upwards' post-grasp
+
+            front_top_grasp_width = pnp_goal.object_width/2.3
+            front_top_grasp_width = floor(front_top_grasp_width*100)/100
+            front_top_grasp = self.create_grasp(front_grasp_top_pose, front_top_approach, front_top_retreat, front_top_grasp_width, grasp_id='front_top_grasp')
+            grasps.append(front_top_grasp)
 
         if (pnp_goal.object_width < max_graspable):
             top_grasp_width_pose = Pose()
@@ -261,7 +280,7 @@ class PickNPlaceServer(object):
             top_grasp_width_approach = Vector3(0.0, 0.0, -1.0)   # approach 'down' for top-grasp
             top_grasp_width_retreat = Vector3(0.0, 0.0, 1.0)    # retreat 'upwards' post-grasp
 
-            top_grasp_width_width = pnp_goal.object_width/2
+            top_grasp_width_width = pnp_goal.object_width/2.3
             top_grasp_width_width = floor(top_grasp_width_width*100)/100
             top_grasp_width = self.create_grasp(top_grasp_width_pose, top_grasp_width_approach, top_grasp_width_retreat, top_grasp_width_width, grasp_id='top_grasp_width')
             grasps.append(top_grasp_width)
@@ -275,7 +294,7 @@ class PickNPlaceServer(object):
             top_grasp_depth_approach = Vector3(0.0, 0.0, -1.0)   # approach 'down' for top-grasp
             top_grasp_depth_retreat = Vector3(0.0, 0.0, 1.0)    # retreat 'upwards' post-grasp
 
-            top_grasp_depth_width = pnp_goal.object_depth/2
+            top_grasp_depth_width = pnp_goal.object_depth/2.3
             top_grasp_depth_width = floor(top_grasp_depth_width*100)/100
             top_grasp_depth = self.create_grasp(top_grasp_depth_pose, top_grasp_depth_approach, top_grasp_depth_retreat, top_grasp_depth_width, grasp_id='top_grasp_depth')
             grasps.append(top_grasp_depth)
@@ -311,8 +330,8 @@ class PickNPlaceServer(object):
         # create arm goal with same 'arm_tool' orientation as the attempted grasp
         goal_pose = PoseStamped()
         goal_pose.header.frame_id = 'base_footprint'
-        goal_pose.pose.position.x = 0.40
-        goal_pose.pose.position.y = 0.00
+        goal_pose.pose.position.x = 0.35
+        goal_pose.pose.position.y = -0.30
         goal_pose.pose.position.z = 0.76
         goal_pose.pose.orientation = grasp.grasp_pose.pose.orientation
 
@@ -320,6 +339,17 @@ class PickNPlaceServer(object):
         self.move_group.set_pose_reference_frame('base_footprint')
         self.move_group.set_pose_target(goal_pose)
         self.move_group.go()
+
+
+    def move(self, linear=(0,0,0), angular=(0,0,0)):
+        self.velocity.linear.x = linear[0] 	# Forward or Backward with in m/sec.
+        self.velocity.linear.y = linear[1]
+        self.velocity.linear.z = linear[2]
+        self.velocity.angular.x = angular[0]
+        self.velocity.angular.y = angular[1]
+        self.velocity.angular.z = angular[2] 	# Anti-clockwise/clockwise in radians per sec
+        
+        self.velocity_publisher.publish(self.velocity)
 
 
     def grasp_object(self, pnp_goal):
@@ -339,7 +369,7 @@ class PickNPlaceServer(object):
         for grasp in grasps:
             # publish grasp marker
             print('publishing grasp marker! ' + grasp.id)
-            if grasp.id is not 'front_grasp':
+            if grasp.id.split('_')[0] != 'front':
                 grasp_marker = Util.visualize_marker(grasp.grasp_pose.pose, scale=0.02, type='pose', color='blue')
             else:
                 grasp_marker = Util.visualize_marker(grasp.grasp_pose.pose, scale=0.02, type='pose')
@@ -358,6 +388,11 @@ class PickNPlaceServer(object):
             rospy.loginfo('pick result: ' + str(moveit_error_dict[error_code]))
 
             if error_code == 1:
+                # turn around for about 180 degs to be clear of furniture
+                for i in range(85):
+                    self.move((0,0,0), (0,0,0.4))
+                    self.rate.sleep()
+
                 # move arm close to body after grasp is successful
                 self.execute_post_grasp_goal(grasp)
                 break
