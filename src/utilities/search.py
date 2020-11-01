@@ -217,7 +217,7 @@ class Search:
         print('No of objects after dimension filter : ', n)
         index = 0
         while (index < n):
-            high_score, matched_object_name = Util.bb_iou(bounding_boxes[index], yolo_detected_objects, match_threshold=0.7)
+            high_score, matched_object_name = Util.bb_iou(bounding_boxes[index], yolo_detected_objects)
             if not high_score:
                 bounding_boxes.pop(index)
                 objects.pop(index)
