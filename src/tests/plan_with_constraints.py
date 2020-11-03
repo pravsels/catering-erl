@@ -3,9 +3,10 @@ import sys
 import rospy
 from moveit_commander import RobotCommander, MoveGroupCommander, roscpp_initialize, roscpp_shutdown
 from moveit_msgs.msg import RobotState, Constraints, OrientationConstraint
-from geometry_msgs.msg import Pose, Quaternion, PoseStamped, Twist
+from geometry_msgs.msg import Pose, Quaternion, PoseStamped, Twist, Point
 from tf.transformations import quaternion_from_euler
 from math import pi as PI
+from collections import namedtuple
 
 class Tiago():
 
@@ -75,11 +76,18 @@ if __name__ == '__main__':
     roscpp_initialize(sys.argv)
     rospy.init_node('moveit_py_demo', anonymous=True)
 
-    tiago = Tiago()
-
-    for i in range(85):
-        tiago.move((0,0,0), (0,0,0.4))
-        tiago.rate.sleep()
+    # tiago = Tiago()
+    #
+    # for i in range(85):
+    #     tiago.move((0,0,0), (0,0,0.4))
+    #     tiago.rate.sleep()
+    ep = Point(0.0, 0.0, 1.0)
+    object = namedtuple('item', ('name', 'centroid', 'center', 'height', 'width', 'depth'))('coffee', ep, ep, ep, ep, ep)
+    object_dict = object._asdict()
+    print('keys : ', object_dict.keys())
+    print('values : ', object_dict.values())
+    fetch_req = {'name': 'request', 'object': object}
+    rospy.set_param('/check', fetch_req)
 
     # print(dir(robot))
     # cs = move_group.get_current_pose()

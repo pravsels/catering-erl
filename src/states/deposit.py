@@ -6,7 +6,7 @@ from utilities import Util
 
 class Deposit(State):
     def __init__(self, tiago):
-        State.__init__(self, outcomes=['fetch_more', 'deposit_done'])
+        State.__init__(self, outcomes=['fetch_more', 'deposit_done'], input_keys=['deposit_in'], output_keys=['deposit_out'])
         self.tiago = tiago
 
     def go_to_user_location(self):
@@ -18,9 +18,9 @@ class Deposit(State):
 
     def execute(self, userdata):
         search_n_fetch_queries = rospy.get_param('/search_n_fetch_queries')
-        search_n_fetch_requests = self.tiago.search_n_fetch_requests
-        print('in deposit state')
-        print(search_n_fetch_requests)
+        search_n_fetch_requests = userdata.deposit_in
+        print('DEPOSIT IN : ')
+        print(userdata.deposit_in)
 
         search_reqs = filter(lambda q: q['intent'] == 'search', search_n_fetch_requests)
         fetch_reqs = filter(lambda q: q['intent'] == 'fetch', search_n_fetch_requests)
@@ -60,8 +60,10 @@ class Deposit(State):
 
             # all search reqs would be satisfied and failed fetch reqs would be removed
             # so store the remaiming fetch reqs
+            userdata.deposit_out = fetch_reqs
+            print('DEPOSIT OUT : ')
+            print(userdata.deposit_out)
             if len(fetch_reqs):
-                self.tiago.search_n_fetch_requests = fetch_reqs
                 return 'fetch_more'
 
         return 'deposit_done'

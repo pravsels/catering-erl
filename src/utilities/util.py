@@ -177,7 +177,12 @@ class Util:
             for query in queries:
                 entity = query['entities'][0]
                 if object.name == entity and query['intent_confidence'] >= intent_confidence_thresh:
-                    r = {'furniture': current_furniture, 'intent': query['intent'], 'object': object, 'status': 'found'}
+                    r = {
+                            'furniture': current_furniture,
+                            'intent': query['intent'],
+                            'object': object,
+                            'status': 'found'
+                    }
                     requests.append(r)
                     queries.remove(query)
 

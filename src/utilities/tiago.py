@@ -27,7 +27,6 @@ class Tiago:
         self.rate = rospy.Rate(10)
 
         self.robot_pose = None
-        self.search_n_fetch_requests = []
 
 		# set linear and angular velocities
         self.velocity = Twist()
@@ -195,9 +194,9 @@ class Tiago:
         # Create the TTS goal and send it
         print('\033[1;36mTIAGO: ' + speech_in + '\033[0m')
         # set speech engine
-        speech_engine = pyttsx.init()
-        speech_engine.say(speech_in)
-        speech_engine.runAndWait()
+        # speech_engine = pyttsx.init()
+        # speech_engine.say(speech_in)
+        # speech_engine.runAndWait()
 
         tts_goal = TtsGoal()
         tts_goal.rawtext.lang_id = 'en_GB'

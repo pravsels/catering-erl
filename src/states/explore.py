@@ -10,7 +10,7 @@ from collections import namedtuple
 
 class Explore(State):
     def __init__(self, tiago, ogm, search):
-        State.__init__(self, outcomes=['manipulate_object', 'report_back'])
+        State.__init__(self, outcomes=['manipulate_object', 'report_back'], output_keys=['explore_out'])
 
         self.tiago = tiago
         self.ogm = ogm
@@ -51,8 +51,7 @@ class Explore(State):
             return current_furniture
 
         # check if object already found, if not then add to found list
-        if not current_furniture['objects']:
-            current_furniture['objects'] = []
+        if not len(current_furniture['objects']):
             # store initial set of objects
             for filtered_object in filtered_objects:
                 centroid = self.get_centroid(filtered_object)
@@ -74,8 +73,6 @@ class Explore(State):
     def execute(self, userdata):
         # get search and fetch params
         search_n_fetch_queries = rospy.get_param('/search_n_fetch_queries')
-        print('in explore state')
-        print(search_n_fetch_queries)
 
         for index in range(0, len(self.tiago.furniture)):
             current_furniture = self.tiago.furniture[index]
@@ -113,10 +110,12 @@ class Explore(State):
             if not len(search_n_fetch_queries):
                 break
 
-        self.tiago.search_n_fetch_requests.extend(self.search_n_fetch_requests)
         rospy.set_param('/search_n_fetch_queries', search_n_fetch_queries)
+        userdata.explore_out = self.search_n_fetch_requests
+        print('EXPLORE OUT : ')
+        print(userdata.explore_out)
         # transition to pick object or go back to user directly
-        if len(filter(lambda q: q['intent'] == 'fetch', self.tiago.search_n_fetch_requests)):    # if there are fetch queries
+        if len(filter(lambda q: q['intent'] == 'fetch', self.search_n_fetch_requests)):    # if there are fetch queries
             return 'manipulate_object'
         else:
             return 'report_back'    # only search queries to report about
