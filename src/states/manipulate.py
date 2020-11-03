@@ -29,7 +29,7 @@ for name in MoveItErrorCodes.__dict__.keys():
 
 class Manipulate(State):
 	def __init__(self, tiago, ogm, search):
-		State.__init__(self, outcomes=['manipulate_done'], input_keys=['manipulate_in'], output_keys=['manipulate_out'])
+		State.__init__(self, outcomes=['manipulate_done'])
 		self.tiago = tiago
 		self.ogm = ogm
 		self.search = search
@@ -153,10 +153,7 @@ class Manipulate(State):
 
 
 	def execute(self, userdata):
-		fetch_reqs = filter(lambda q: q['intent'] == 'fetch', userdata.manipulate_in)
-		print('MANIPULATE IN : ')
-		print(userdata.manipulate_in)
-
+		fetch_reqs = filter(lambda q: q['intent'] == 'fetch', self.tiago.snf_requests)
 		# sort to nearest fetch reqs first and pick last one
 		fetch_reqs = sorted(fetch_reqs, key=lambda x: x['furniture']['distance_from_user'])
 
@@ -183,9 +180,5 @@ class Manipulate(State):
 				self.tiago.play('home')
 			else:
 				current_fetch_req['status'] = 'pick_success'
-
-		userdata.manipulate_out = fetch_reqs
-		print('MANIPULATE OUT : ')
-		print(userdata.manipulate_out)
 
 		return 'manipulate_done'

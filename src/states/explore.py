@@ -10,7 +10,7 @@ from collections import namedtuple
 
 class Explore(State):
     def __init__(self, tiago, ogm, search):
-        State.__init__(self, outcomes=['manipulate_object', 'report_back'], output_keys=['explore_out'])
+        State.__init__(self, outcomes=['manipulate_object', 'report_back'])
 
         self.tiago = tiago
         self.ogm = ogm
@@ -111,11 +111,9 @@ class Explore(State):
                 break
 
         rospy.set_param('/search_n_fetch_queries', search_n_fetch_queries)
-        userdata.explore_out = self.search_n_fetch_requests
-        print('EXPLORE OUT : ')
-        print(userdata.explore_out)
+        self.tiago.snf_requests = self.search_n_fetch_requests
         # transition to pick object or go back to user directly
-        if len(filter(lambda q: q['intent'] == 'fetch', self.search_n_fetch_requests)):    # if there are fetch queries
+        if len(filter(lambda q: q['intent'] == 'fetch', self.tiago.snf_requests)):    # if there are fetch queries
             return 'manipulate_object'
         else:
             return 'report_back'    # only search queries to report about

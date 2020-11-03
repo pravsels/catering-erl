@@ -18,9 +18,9 @@ class Deposit(State):
 
     def execute(self, userdata):
         search_n_fetch_queries = rospy.get_param('/search_n_fetch_queries')
-        search_n_fetch_requests = userdata.deposit_in
+        search_n_fetch_requests = self.tiago.snf_requests
         print('DEPOSIT IN : ')
-        print(userdata.deposit_in)
+        print(search_n_fetch_requests)
 
         search_reqs = filter(lambda q: q['intent'] == 'search', search_n_fetch_requests)
         fetch_reqs = filter(lambda q: q['intent'] == 'fetch', search_n_fetch_requests)
@@ -60,9 +60,7 @@ class Deposit(State):
 
             # all search reqs would be satisfied and failed fetch reqs would be removed
             # so store the remaiming fetch reqs
-            userdata.deposit_out = fetch_reqs
-            print('DEPOSIT OUT : ')
-            print(userdata.deposit_out)
+            self.tiago.snf_requests = fetch_reqs
             if len(fetch_reqs):
                 return 'fetch_more'
 

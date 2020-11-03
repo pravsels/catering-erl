@@ -27,6 +27,7 @@ class Tiago:
         self.rate = rospy.Rate(10)
 
         self.robot_pose = None
+        self.snf_requests = []
 
 		# set linear and angular velocities
         self.velocity = Twist()
