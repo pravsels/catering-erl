@@ -16,7 +16,7 @@ if __name__ == '__main__':
     sm = StateMachine(outcomes=['success', 'failure'])  # the end states of the machine
 
     with sm:
-        StateMachine.add('start', Start(tiago, ogm), transitions={'start_done':'explore', 'start_abort': 'failure'})
+        StateMachine.add('start', Start(tiago, ogm, 'text'), transitions={'start_done':'explore', 'start_abort': 'failure'})
         StateMachine.add('explore', Explore(tiago, ogm, search), transitions={'manipulate_object': 'manipulate', 'report_back': 'deposit'})
         StateMachine.add('manipulate', Manipulate(tiago, ogm, search), transitions={'manipulate_done':'deposit'})
         StateMachine.add('deposit', Deposit(tiago), transitions={'fetch_more':'manipulate', 'deposit_done': 'success'})

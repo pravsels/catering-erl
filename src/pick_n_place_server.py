@@ -251,7 +251,7 @@ class PickNPlaceServer(object):
             front_center_approach = Vector3(1.0, 0.0, 0.0)   # approach 'in' for front-grasp
             front_center_retreat = Vector3(0.0, 0.0, 1.0)    # retreat 'upwards' post-grasp
 
-            front_center_grasp_width = pnp_goal.object_width/2.55
+            front_center_grasp_width = pnp_goal.object_width/2.58
             front_center_grasp_width = floor(front_center_grasp_width*100)/100
             front_center_grasp = self.create_grasp(front_grasp_center_pose, front_center_approach, front_center_retreat, front_center_grasp_width, grasp_id='front_center_grasp')
             grasps.append(front_center_grasp)
@@ -266,7 +266,7 @@ class PickNPlaceServer(object):
             front_top_approach = Vector3(1.0, 0.0, 0.0)   # approach 'in' for front-grasp
             front_top_retreat = Vector3(0.0, 0.0, 1.0)    # retreat 'upwards' post-grasp
 
-            front_top_grasp_width = pnp_goal.object_width/2.55
+            front_top_grasp_width = pnp_goal.object_width/2.58
             front_top_grasp_width = floor(front_top_grasp_width*100)/100
             front_top_grasp = self.create_grasp(front_grasp_top_pose, front_top_approach, front_top_retreat, front_top_grasp_width, grasp_id='front_top_grasp')
             grasps.append(front_top_grasp)
@@ -280,7 +280,7 @@ class PickNPlaceServer(object):
             top_grasp_width_approach = Vector3(0.0, 0.0, -1.0)   # approach 'down' for top-grasp
             top_grasp_width_retreat = Vector3(0.0, 0.0, 1.0)    # retreat 'upwards' post-grasp
 
-            top_grasp_width_width = pnp_goal.object_width/2.55
+            top_grasp_width_width = pnp_goal.object_width/2.58
             top_grasp_width_width = floor(top_grasp_width_width*100)/100
             top_grasp_width = self.create_grasp(top_grasp_width_pose, top_grasp_width_approach, top_grasp_width_retreat, top_grasp_width_width, grasp_id='top_grasp_width')
             grasps.append(top_grasp_width)
@@ -294,7 +294,7 @@ class PickNPlaceServer(object):
             top_grasp_depth_approach = Vector3(0.0, 0.0, -1.0)   # approach 'down' for top-grasp
             top_grasp_depth_retreat = Vector3(0.0, 0.0, 1.0)    # retreat 'upwards' post-grasp
 
-            top_grasp_depth_width = pnp_goal.object_depth/2.55
+            top_grasp_depth_width = pnp_goal.object_depth/2.58
             top_grasp_depth_width = floor(top_grasp_depth_width*100)/100
             top_grasp_depth = self.create_grasp(top_grasp_depth_pose, top_grasp_depth_approach, top_grasp_depth_retreat, top_grasp_depth_width, grasp_id='top_grasp_depth')
             grasps.append(top_grasp_depth)

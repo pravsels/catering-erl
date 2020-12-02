@@ -7,13 +7,13 @@ from utilities import Util
 from geometry_msgs.msg import Pose, Point
 
 class Start(State):
-    def __init__(self, tiago, ogm):
+    def __init__(self, tiago, ogm, speech_mode='text'):
         State.__init__(self, outcomes=['start_done', 'start_abort'])
         self.tiago = tiago
         self.ogm = ogm
         self.dialogflow_project_id = rospy.get_param('/dialogflow_project_id')
         self.session_id = str(uuid.uuid4())
-        self.speech_mode = 'text'
+        self.speech_mode = speech_mode
 
 
     def get_intent_from_text(self, project_id, session_id, text, language_code='en-US'):
