@@ -2,6 +2,7 @@
 
 Robot helps searching for known objects around the house, manipulating and delivering it if asked to.
 
+Video Demo: https://www.youtube.com/watch?v=GJdboqKzsMc
 
 <h2> Setup  </h2>
 For this project, several packages from the sensible-robots group is needed. These were developed by the LASR (Leeds Autonomous Service Robots) team. The packages are:
